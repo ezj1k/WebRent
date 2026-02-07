@@ -10,4 +10,5 @@ public class WebRentApplication {
 		SpringApplication.run(WebRentApplication.class, args);
 	}
 //preved :D
+    //huy
 }
