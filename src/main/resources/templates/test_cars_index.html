@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>WebRent - Lista Masini</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Lista de Mașini Disponibile</h2>
+    <a th:href="@{/cars/new}" class="btn btn-primary">Adaugă Mașină Nouă</a>
+</div>
+
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
+    <tr>
+        <th>Brand</th>
+        <th>Model</th>
+        <th>An</th>
+        <th>Nr. Inmatriculare</th>
+        <th>Preț/Zi</th>
+        <th>Status</th>
+        <th>Acțiuni</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="car : ${listCars}">
+        <td th:text="${car.brand}"></td>
+        <td th:text="${car.model}"></td>
+        <td th:text="${car.year}"></td>
+        <td th:text="${car.licensePlate}"></td>
+        <td th:text="${car.pricePerDay} + ' EUR'"></td>
+        <td>
+                    <span th:classappend="${car.status.name() == 'AVAILABLE' ? 'badge bg-success' : 'badge bg-danger'}"
+                          th:text="${car.status}"></span>
+        </td>
+        <td>
+            <a th:href="@{/cars/edit/{id}(id=${car.id})}" class="btn btn-sm btn-info text-white">Editează</a>
+            <a th:href="@{/cars/delete/{id}(id=${car.id})}"
+               class="btn btn-sm btn-danger"
+               onclick="return confirm('Sigur vrei să ștergi mașina?')">Șterge</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

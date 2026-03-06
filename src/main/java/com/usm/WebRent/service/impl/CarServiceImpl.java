@@ -6,6 +6,8 @@ import com.usm.WebRent.service.CarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CarServiceImpl implements CarService {
@@ -13,6 +15,39 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public Car save(Car car) {return carRepository.save(car);}
-//    @Override
-//    public Car deleteById(Car car) {return carRepository.deleteById(car.getId());}
+
+    @Override
+    public List<Car> findAll() {return carRepository.findAll();}
+
+    @Override
+    public Car findById(Long id) {return carRepository.findById(id).orElseThrow(()-> new RuntimeException("Car with id:" + id + "doesn't exists"));}
+
+    @Override
+    public Car pudate(Long id, Car carDetails) {
+        Car car = findById(id);
+
+        car.setBrand(carDetails.getBrand());
+        car.setModel(carDetails.getModel());
+        car.setYear(carDetails.getYear());
+        car.setLicensePlate(carDetails.getLicensePlate());
+        car.setCategory(carDetails.getCategory());
+        car.setTransmission(carDetails.getTransmission());
+        car.setEngineVolume(carDetails.getEngineVolume());
+        car.setFuelType(carDetails.getFuelType());
+        car.setPricePerDay(carDetails.getPricePerDay());
+        car.setStatus(carDetails.getStatus());
+        car.setImageUrl(carDetails.getImageUrl());
+        car.setFeatures(carDetails.getFeatures());
+
+        return carRepository.save(car);
+
+
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        carRepository.deleteById(id);
+    }
+
+
 }

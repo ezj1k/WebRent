@@ -38,7 +38,7 @@ public class Rental {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pickup_location_id")
-    private Location pickupLocation; 
+    private Location pickupLocation;
 
     private LocalDateTime createdAt;
 }
