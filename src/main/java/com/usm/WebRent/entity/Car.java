@@ -40,6 +40,8 @@ public class Car {
 
     @Enumerated(EnumType.STRING)
     private CarStatus status;
+
+    @Column(name = "image_path")
     private String imageUrl;
 
 //    @ElementCollection
@@ -49,5 +51,6 @@ public class Car {
 
     @Column(length = 1000)
     private String features;
+
 
 }

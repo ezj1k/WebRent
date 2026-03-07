@@ -1,48 +1,265 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>WebRent - Lista Masini</title>
+    <title>WebRent - Lista Mașini</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="container mt-5">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red: #e63946;
+            --dark: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --border: #2a2a2a;
+            --text-muted: #888;
+        }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Lista de Mașini Disponibile</h2>
-    <a th:href="@{/cars/new}" class="btn btn-primary">Adaugă Mașină Nouă</a>
+        body {
+            background-color: var(--dark);
+            color: #f0f0f0;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        h2 {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+            letter-spacing: 1px;
+        }
+
+        .car-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .car-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--red);
+        }
+
+        .car-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .car-card .no-image {
+            width: 100%;
+            height: 200px;
+            background: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 3rem;
+        }
+
+        .car-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-available {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid #28a745;
+            border-radius: 20px;
+            padding: 3px 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-unavailable {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid #dc3545;
+            border-radius: 20px;
+            padding: 3px 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .info-row:last-of-type {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+        }
+
+        .info-value {
+            font-weight: 500;
+        }
+
+        .price-badge {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--red);
+        }
+
+        .features-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .feature-tag {
+            background: #252525;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 0.72rem;
+            color: #aaa;
+        }
+
+        .btn-edit {
+            background: transparent;
+            border: 1px solid #0dcaf0;
+            color: #0dcaf0;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            padding: 5px 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-edit:hover {
+            background: #0dcaf0;
+            color: #000;
+        }
+
+        .btn-delete {
+            background: transparent;
+            border: 1px solid var(--red);
+            color: var(--red);
+            border-radius: 8px;
+            font-size: 0.82rem;
+            padding: 5px 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .btn-add {
+            background: var(--red);
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 8px 24px;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-add:hover {
+            opacity: 0.85;
+            color: #fff;
+        }
+
+        .header-bar {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body class="container py-5">
+
+<div class="d-flex justify-content-between align-items-center header-bar">
+    <h2>🚗 Flotă Vehicule</h2>
+    <a th:href="@{/cars/new}" class="btn-add btn">+ Adaugă Mașină</a>
 </div>
 
-<table class="table table-striped table-bordered">
-    <thead class="table-dark">
-    <tr>
-        <th>Brand</th>
-        <th>Model</th>
-        <th>An</th>
-        <th>Nr. Inmatriculare</th>
-        <th>Preț/Zi</th>
-        <th>Status</th>
-        <th>Acțiuni</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="car : ${listCars}">
-        <td th:text="${car.brand}"></td>
-        <td th:text="${car.model}"></td>
-        <td th:text="${car.year}"></td>
-        <td th:text="${car.licensePlate}"></td>
-        <td th:text="${car.pricePerDay} + ' EUR'"></td>
-        <td>
-                    <span th:classappend="${car.status.name() == 'AVAILABLE' ? 'badge bg-success' : 'badge bg-danger'}"
-                          th:text="${car.status}"></span>
-        </td>
-        <td>
-            <a th:href="@{/cars/edit/{id}(id=${car.id})}" class="btn btn-sm btn-info text-white">Editează</a>
-            <a th:href="@{/cars/delete/{id}(id=${car.id})}"
-               class="btn btn-sm btn-danger"
-               onclick="return confirm('Sigur vrei să ștergi mașina?')">Șterge</a>
-        </td>
-    </tr>
-    </tbody>
-</table>
+<div class="row g-4">
+    <div class="col-md-6 col-lg-4" th:each="car : ${listCars}">
+        <div class="car-card h-100 d-flex flex-column">
+
+            <!-- Imagine -->
+            <div th:if="${car.imageUrl != null and !#strings.isEmpty(car.imageUrl)}">
+                <img th:src="@{${car.imageUrl}}" th:alt="${car.brand + ' ' + car.model}">
+            </div>
+            <div class="no-image" th:unless="${car.imageUrl != null and !#strings.isEmpty(car.imageUrl)}">
+                🚘
+            </div>
+
+            <div class="p-3 d-flex flex-column flex-grow-1">
+                <!-- Titlu + Status -->
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="car-title" th:text="${car.brand + ' ' + car.model}"></div>
+                    <span class="badge-available" th:if="${car.status != null and car.status.name() == 'AVAILABLE'}" th:text="${car.status}"></span>
+                    <span class="badge-unavailable" th:unless="${car.status != null and car.status.name() == 'AVAILABLE'}" th:text="${car.status}"></span>
+                </div>
+
+                <!-- Preț -->
+                <div class="mb-3">
+                    <span class="price-badge" th:text="${car.pricePerDay} + ' EUR/zi'"></span>
+                </div>
+
+                <!-- Detalii -->
+                <div class="mb-3 flex-grow-1">
+                    <div class="info-row">
+                        <span class="info-label">An fabricație</span>
+                        <span class="info-value" th:text="${car.year}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Nr. Înmatriculare</span>
+                        <span class="info-value" th:text="${car.licensePlate}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Categorie</span>
+                        <span class="info-value" th:text="${car.category}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Transmisie</span>
+                        <span class="info-value" th:text="${car.transmission}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Motor</span>
+                        <span class="info-value" th:text="${car.engineVolume} + ' L'"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Combustibil</span>
+                        <span class="info-value" th:text="${car.fuelType}"></span>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="features-list mb-3" th:if="${car.features != null and !#strings.isEmpty(car.features)}">
+                    <span class="feature-tag"
+                          th:each="f : ${#strings.arraySplit(car.features, ',')}"
+                          th:text="${#strings.trim(f)}"></span>
+                </div>
+
+                <!-- Acțiuni -->
+                <div class="d-flex gap-2 mt-auto">
+                    <a th:href="@{/cars/edit/{id}(id=${car.id})}" class="btn-edit btn">Editează</a>
+                    <a th:href="@{/cars/delete/{id}(id=${car.id})}"
+                       class="btn-delete btn"
+                       onclick="return confirm('Sigur vrei să ștergi mașina?')">Șterge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

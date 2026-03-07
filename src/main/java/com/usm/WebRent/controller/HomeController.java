@@ -15,10 +15,10 @@ public class HomeController {
         return "index";
     }
 
-    @GetMapping("/test")
-    public String test(){
-        return "test_cars_index";
-    }
+//    @GetMapping("/cars")
+//    public String test(){
+//        return "test_cars_index";
+//    }
 
 
 }

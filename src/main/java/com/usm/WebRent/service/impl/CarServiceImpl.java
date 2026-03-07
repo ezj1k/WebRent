@@ -23,7 +23,7 @@ public class CarServiceImpl implements CarService {
     public Car findById(Long id) {return carRepository.findById(id).orElseThrow(()-> new RuntimeException("Car with id:" + id + "doesn't exists"));}
 
     @Override
-    public Car pudate(Long id, Car carDetails) {
+    public Car update(Long id, Car carDetails) {
         Car car = findById(id);
 
         car.setBrand(carDetails.getBrand());
