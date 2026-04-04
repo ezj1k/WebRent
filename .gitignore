@@ -30,3 +30,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+#imaginile tot nu le trimite pe git
+/src/main/resources/static/media/cars/*
+

@@ -6,6 +6,7 @@ import com.usm.WebRent.repository.UsersRepository;
 import com.usm.WebRent.service.UsersService;
 import jakarta.persistence.Column;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,9 +16,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UsersServiceImpl implements UsersService {
     private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
+
 
     @Override
     public Users save(Users users) {
+        users.setPassword(passwordEncoder.encode(users.getPassword()));
         return usersRepository.save(users);
     }
 

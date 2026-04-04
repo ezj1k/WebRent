@@ -6,6 +6,7 @@ import com.usm.WebRent.entity.Rental;
 import com.usm.WebRent.entity.Users;
 import com.usm.WebRent.entity.enums.RentalStatus;
 import com.usm.WebRent.repository.RentalRepository;
+import com.usm.WebRent.service.CarService;
 import com.usm.WebRent.service.RentalService;
 import jakarta.persistence.*;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,32 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RentalServiceImpl implements RentalService {
     private final RentalRepository rentalRepository;
+    private final CarService carService;
+
 
     @Override
     public Rental save(Rental rental) {
+        if (rental.getId() == null) {
+            rental.setCreatedAt(java.time.LocalDateTime.now());
+        }
+
+        if (rental.getCar() != null && rental.getCar().getId() != null) {
+            Car fullCar = carService.findById(rental.getCar().getId());
+            rental.setCar(fullCar);
+
+            if (rental.getStartDate() != null && rental.getEndDate() != null) {
+                long days = java.time.temporal.ChronoUnit.DAYS.between(
+                        rental.getStartDate(),
+                        rental.getEndDate()
+                );
+
+                if (days <= 0) days = 1;
+
+                double calculatedPrice = days * fullCar.getPricePerDay();
+                rental.setTotalPrice(calculatedPrice);
+            }
+        }
+
         return rentalRepository.save(rental);
     }
 

@@ -3,7 +3,6 @@ package com.usm.WebRent.controller;
 import com.usm.WebRent.entity.*;
 import com.usm.WebRent.service.*;
 import lombok.RequiredArgsConstructor;
-import org.antlr.v4.runtime.tree.pattern.ParseTreePattern;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -12,10 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
+
 
 @Controller
 @RequiredArgsConstructor
@@ -24,7 +20,6 @@ public class AdminController {
 
     private final UsersService usersService;
     private final CarService carService;
-    private final PasswordEncoder passwordEncoder;
     private final ReviewService reviewService;
     private final LocationService locationService;
     private final RentalService rentalService;
@@ -71,7 +66,6 @@ public class AdminController {
 
     @PostMapping("/users/save")
     public String saveUser(@ModelAttribute Users user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         usersService.save(user);
         return "redirect:/admin/users";
     }
@@ -118,37 +112,9 @@ public class AdminController {
 
     @PostMapping("/cars/save")
     public String saveCar(@ModelAttribute("car") Car car,
-                          @RequestParam(value = "imageFile", required = false)MultipartFile imageFile) throws IOException {
+                          @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) throws IOException {
 
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String uploadDir = "src/main/resources/static/media/cars/";
-
-            Path dirPath = Paths.get(uploadDir);
-            Files.createDirectories(dirPath);
-
-            String originalFilename = imageFile.getOriginalFilename();
-            String extension = (originalFilename != null && originalFilename.contains("."))
-                    ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                    : ".jpg";
-
-            String fileName = UUID.randomUUID() + extension;
-
-            Files.write(dirPath.resolve(fileName), imageFile.getBytes());
-
-            car.setImageUrl("/media/cars/" + fileName);
-        }
-
-        if (imageFile == null || imageFile.isEmpty()) {
-            if (car.getId() != null) {
-                Car existing = carService.findById(car.getId());
-                car.setImageUrl(existing.getImageUrl());
-            }
-        }
-
-
-
-
-        carService.save(car);
+        carService.save(car, imageFile);
         return "redirect:/admin/cars";
     }
 
@@ -212,28 +178,6 @@ public class AdminController {
 
     @PostMapping("/rentals/save")
     public String saveRental(@ModelAttribute Rental rental) {
-        // Dacă ai nevoie de data creării automată
-        if(rental.getId() == null) {
-            rental.setCreatedAt(java.time.LocalDateTime.now());
-        }
-
-        if (rental.getCar() != null && rental.getCar().getId() != null) {
-            Car fullCar = carService.findById(rental.getCar().getId());
-            rental.setCar(fullCar); // Atasăm obiectul complet
-
-            // 3. Calculăm prețul total automat
-            if (rental.getStartDate() != null && rental.getEndDate() != null) {
-                long days = java.time.temporal.ChronoUnit.DAYS.between(
-                        rental.getStartDate(),
-                        rental.getEndDate()
-                );
-
-                if (days <= 0) days = 1; // Minim o zi
-
-                double calculatedPrice = days * fullCar.getPricePerDay();
-                rental.setTotalPrice(calculatedPrice);
-            }
-        }
         rentalService.save(rental);
         return "redirect:/admin/rentals";
     }
