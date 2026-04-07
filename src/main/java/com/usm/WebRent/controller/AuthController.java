@@ -2,54 +2,34 @@ package com.usm.WebRent.controller;
 
 import com.usm.WebRent.entity.Users;
 import com.usm.WebRent.service.AuthService;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
 
-    @GetMapping("/login")
-    public String loginPage() {
-        return "auth/login";
-    }
-
     @PostMapping("/login")
-    public String login(@RequestParam String email,
-                        @RequestParam String password,
-                        HttpSession session,
-                        Model model) {
-        String redirect = authService.login(email, password, session);
-        if (redirect == null) {
-            model.addAttribute("error", "Email or password incorect !");
-            return "auth/login";
+    public ResponseEntity<?> login(@RequestBody Users loginRequest) {
+        Users user = authService.login(loginRequest.getEmail(), loginRequest.getPassword());
+
+        if (user == null) {
+            return ResponseEntity.status(401).body("Email sau parolă incorectă!");
         }
-        return redirect;
-    }
 
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/login";
-    }
-
-    @GetMapping("/register")
-    public String registerPage(Model model) {
-        model.addAttribute("user", new Users());
-        return "auth/register";
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("/register")
-    public String register(@ModelAttribute Users user, Model model) {
-        if (!authService.register(user)) {
-            model.addAttribute("error", "Email-ul este deja folosit!");
-            return "auth/register";
-        }
-        return "redirect:/login?registered";
+    public ResponseEntity<String> register(@RequestBody Users user) {
+        authService.register(user);
+        return ResponseEntity.status(201).body("Utilizator înregistrat cu succes!");
     }
 }
