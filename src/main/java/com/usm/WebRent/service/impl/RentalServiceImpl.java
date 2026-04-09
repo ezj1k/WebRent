@@ -5,6 +5,7 @@ import com.usm.WebRent.entity.Location;
 import com.usm.WebRent.entity.Rental;
 import com.usm.WebRent.entity.Users;
 import com.usm.WebRent.entity.enums.RentalStatus;
+import com.usm.WebRent.exception.*;
 import com.usm.WebRent.repository.RentalRepository;
 import com.usm.WebRent.service.CarService;
 import com.usm.WebRent.service.RentalService;
@@ -29,11 +30,18 @@ public class RentalServiceImpl implements RentalService {
             rental.setCreatedAt(java.time.LocalDateTime.now());
         }
 
+        if (rental.getCar() == null) throw new CarNotFoundException(null);
+        if (rental.getUser() == null) throw new UserNotFoundException(null);
+
         if (rental.getCar() != null && rental.getCar().getId() != null) {
             Car fullCar = carService.findById(rental.getCar().getId());
             rental.setCar(fullCar);
 
             if (rental.getStartDate() != null && rental.getEndDate() != null) {
+                if (rental.getEndDate().isBefore(rental.getStartDate())) {
+                    throw new InvalidRentalDatesException("Data de returnare nu poate fi înainte de data ridicării!");
+                }
+
                 long days = java.time.temporal.ChronoUnit.DAYS.between(
                         rental.getStartDate(),
                         rental.getEndDate()
@@ -46,17 +54,26 @@ public class RentalServiceImpl implements RentalService {
             }
         }
 
+        if (rental.getEndDate().isBefore(rental.getStartDate())) {
+            throw new InvalidRentalDatesException("Perioadă invalidă!");
+        }
+
         return rentalRepository.save(rental);
     }
 
     @Override
     public List<Rental> findAll() {
-        return rentalRepository.findAll();
+        List<Rental> rentals = rentalRepository.findAll();
+        if (rentals.isEmpty()) {
+            throw new EmptyListException("Rentals");
+        }
+        return rentals;
     }
 
     @Override
     public Rental findById(Long id) {
-        return rentalRepository.findById(id).orElseThrow(()-> new RuntimeException("Rental with id:" + id + "doesn't exist"));
+        return rentalRepository.findById(id)
+                .orElseThrow(() -> new RentalNotFoundException(id));
     }
 
     @Override
@@ -77,6 +94,12 @@ public class RentalServiceImpl implements RentalService {
 
     @Override
     public void deleteById(Long id) {
+        Rental rental = rentalRepository.findById(id)
+                .orElseThrow(() -> new RentalNotFoundException(id));
+
+        if ("COMPLETED".equals(rental.getStatus().toString())) {
+            throw new RentalActionException("Nu poți șterge o rezervare care a fost deja finalizată!");
+        }
         rentalRepository.deleteById(id);
     }
 }

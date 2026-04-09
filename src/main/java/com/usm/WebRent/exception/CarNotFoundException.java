@@ -9,3 +9,4 @@ public class CarNotFoundException extends RuntimeException {
         super("Mașina cu id: " + id + " nu există!");
     }
 }
+

@@ -1,7 +1,12 @@
 package com.usm.WebRent.service.impl;
 
+import com.usm.WebRent.entity.Review;
 import com.usm.WebRent.entity.Users;
 import com.usm.WebRent.entity.enums.UserStatus;
+import com.usm.WebRent.exception.EmailAlreadyExistsException;
+import com.usm.WebRent.exception.EmptyListException;
+import com.usm.WebRent.exception.UserNotFoundException;
+import com.usm.WebRent.exception.UserUpdateException;
 import com.usm.WebRent.repository.UsersRepository;
 import com.usm.WebRent.service.UsersService;
 import jakarta.persistence.Column;
@@ -21,34 +26,48 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public Users save(Users users) {
+        // Verificăm dacă email-ul există deja înainte de a salva
+        if (usersRepository.findByEmail(users.getEmail()).isPresent()) {
+            throw new EmailAlreadyExistsException(users.getEmail());
+        }
         users.setPassword(passwordEncoder.encode(users.getPassword()));
         return usersRepository.save(users);
     }
 
     @Override
     public List<Users> findAll() {
-        return usersRepository.findAll();
+        List<Users> users = usersRepository.findAll();
+        if (users.isEmpty()) {
+            throw new EmptyListException("Users");
+        }
+        return users;
     }
 
     @Override
     public Users findById(Long id) {
-        return usersRepository.findById(id).orElseThrow(()-> new RuntimeException("User with id:" + id + "doesn't exist"));
+        return usersRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     @Override
     public Users update(Long id, Users usersDetails) {
-        Users users = findById(id);
+        Users user = usersRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
 
-        users.setCreatedAt(usersDetails.getCreatedAt());
-        users.setEmail(usersDetails.getEmail());
-        users.setPhone(usersDetails.getPhone());
-        users.setPassword(usersDetails.getPassword());
-        users.setStatus(usersDetails.getStatus());
-        users.setDriverLicenseNumber(usersDetails.getDriverLicenseNumber());
-        users.setFirstName(usersDetails.getFirstName());
-        users.setLastName(usersDetails.getLastName());
+        try {
+            user.setEmail(usersDetails.getEmail());
+            user.setCreatedAt(usersDetails.getCreatedAt());
+            user.setPhone(usersDetails.getPhone());
+            user.setPassword(usersDetails.getPassword());
+            user.setStatus(usersDetails.getStatus());
+            user.setDriverLicenseNumber(usersDetails.getDriverLicenseNumber());
+            user.setFirstName(usersDetails.getFirstName());
+            user.setLastName(usersDetails.getLastName());
 
-        return usersRepository.save(users);
+            return usersRepository.save(user);
+        } catch (Exception e) {
+            throw new UserUpdateException("Datele furnizate pentru actualizare sunt invalide.");
+        }
     }
 
     @Override

@@ -1,9 +1,14 @@
 package com.usm.WebRent.service.impl;
 
 import com.usm.WebRent.entity.Car;
+import com.usm.WebRent.entity.Rental;
 import com.usm.WebRent.entity.Review;
 import com.usm.WebRent.entity.Users;
 import com.usm.WebRent.entity.enums.ReviewRating;
+import com.usm.WebRent.exception.EmptyListException;
+import com.usm.WebRent.exception.ReviewNotFoundException;
+import com.usm.WebRent.exception.ReviewRatingException;
+import com.usm.WebRent.exception.UserNotFoundException;
 import com.usm.WebRent.repository.ReviewRepository;
 import com.usm.WebRent.service.ReviewService;
 import jakarta.persistence.*;
@@ -20,17 +25,32 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Review save(Review review) {
+        // Presupunem că ReviewRating este un Enum sau un număr
+        if (review.getRating() == null) {
+            throw new ReviewRatingException();
+        }
+
+        // Verificăm dacă user-ul care lasă review există
+        if (review.getUser() == null || review.getUser().getId() == null) {
+            throw new UserNotFoundException(null);
+        }
+
         return reviewRepository.save(review);
     }
 
     @Override
     public List<Review> findAll() {
-        return reviewRepository.findAll();
+        List<Review> reviews = reviewRepository.findAll();
+        if (reviews.isEmpty()) {
+            throw new EmptyListException("Reviews");
+        }
+        return reviews;
     }
 
     @Override
     public Review findById(Long id) {
-        return reviewRepository.findById(id).orElseThrow(()-> new RuntimeException("Review with id:" + id + "doesn't exist"));
+        return reviewRepository.findById(id)
+                .orElseThrow(() -> new ReviewNotFoundException(id));
     }
 
     @Override

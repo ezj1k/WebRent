@@ -2,6 +2,8 @@ package com.usm.WebRent.service.impl;
 
 import com.usm.WebRent.entity.Car;
 import com.usm.WebRent.exception.CarNotFoundException;
+import com.usm.WebRent.exception.CarSaveException;
+import com.usm.WebRent.exception.EmptyCarListException;
 import com.usm.WebRent.repository.CarRepository;
 import com.usm.WebRent.service.CarService;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +18,20 @@ public class CarServiceImpl implements CarService {
     private final CarRepository carRepository;
 
     @Override
-    public Car save(Car car)  {
+    public Car save(Car car) {
+        if (car.getBrand() == null || car.getLicensePlate() == null) {
+            throw new CarSaveException("Brand-ul și numărul de înmatriculare sunt obligatorii!");
+        }
         return carRepository.save(car);
     }
 
     @Override
     public List<Car> findAll() {
-        return carRepository.findAll();
+        List<Car> cars = carRepository.findAll();
+        if (cars.isEmpty()) {
+            throw new EmptyCarListException();
+        }
+        return cars;
     }
 
     @Override

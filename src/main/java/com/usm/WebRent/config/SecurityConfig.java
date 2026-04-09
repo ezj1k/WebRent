@@ -21,22 +21,39 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) // fara sesiuni
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        //.requestMatchers("/api/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("/api/admin/**").permitAll() // doar pentru testare
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//                .csrf(csrf -> csrf.disable())
+//                .sessionManagement(session -> session
+//                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) // fara sesiuni
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/api/auth/**").permitAll()
+//                        //.requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+//                        .requestMatchers("/api/admin/**").permitAll() // doar pentru testare
+//                        .anyRequest().authenticated()
+//                )
+//                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+//
+//        return http.build();
+//    }
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Schimbă în STATELESS dacă folosești JWT
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/admin/**").permitAll() // Rămâne permitAll
+                    .requestMatchers("/error").permitAll()       // IMPORTANT: Permite accesul la ruta de erori
+                    .anyRequest().authenticated()
+            )
+            // Dacă vrei să ignori complet filtrul JWT pentru rutele de test:
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+    return http.build();
+}
 
     @Bean
     public PasswordEncoder passwordEncoder() {
