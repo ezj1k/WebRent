@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) // fara sesiuni
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/error").permitAll()
                         //.requestMatchers("/api/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/admin/**").permitAll() // doar pentru testare
                         .anyRequest().authenticated()
