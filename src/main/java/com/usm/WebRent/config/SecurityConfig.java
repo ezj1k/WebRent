@@ -21,22 +21,7 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
 
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(csrf -> csrf.disable())
-//                .sessionManagement(session -> session
-//                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) // fara sesiuni
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/api/auth/**").permitAll()
-//                        //.requestMatchers("/api/admin/**").hasAuthority("ADMIN")
-//                        .requestMatchers("/api/admin/**").permitAll() // doar pentru testare
-//                        .anyRequest().authenticated()
-//                )
-//                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-//
-//        return http.build();
-//    }
+
 @Bean
 public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
@@ -51,6 +36,7 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             )
             // Dacă vrei să ignori complet filtrul JWT pentru rutele de test:
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
 
     return http.build();
 }
